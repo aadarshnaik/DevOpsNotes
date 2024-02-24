@@ -1,0 +1,40 @@
+CI Flow
+Developer --> Fetch Code (Git) --> Build (Maven) --> Unit Test (Maven) --> Code Analysis (sonarQube) --> Upload Artifacts (NexusOSS)
+We create 3 servers 
+JenkinsServer - Build & Test
+NexusServer - Upload Artifacts
+SonarQubeServer  - Code Analysis
+
+Pipeline as a code
+-------------------
+Automate pipeline setup with Jenkinsfile
+Jenkinsfile defines Stages in CI/CD Pipeline
+Jenkinsfile is a text file with Pipeline DSL Syntax
+Similar to groovy
+Two types of Syntax
+	- Scripted
+	- Declaritive --> way forward
+
+Pipeline
+---------
+pipeline{
+  agent any
+  stages {
+    stage('Fetch Code') {
+	steps {
+	  git branch: 'paac', url: 'https://github.com/devopshydclub/vprofile-repo.git'
+	}
+    }
+    stage('Build') {
+      steps {
+	  sh 'mvn install'
+	}
+    }
+    stage('Test') {
+      steps{
+	  sh 'mvn test'
+	}
+    }
+    
+  }
+}

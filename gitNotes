@@ -1,0 +1,50 @@
+GIT NOTES
+---------------
+git log
+git show  <commit-id>
+git remote add origin <central-git url>
+git push -u origin master
+
+git merge <branch_name>
+
+
+Git Conflict - When same file having different content in different branches, when we merge conflict occurs
+To resolve this delete the file from master or make changes to files and merge 
+
+Stashing - Suppose we are implementing a new feature for the product. The code is in progress and suddenly customer escalation comes
+		so because of this we need to keep aside our new feature and work on escalation work.
+		We cannot commit our partial code and also cannot throw away our changes. So you need some temporary storage, when you can store your
+		partial changes and later on commit.
+
+git stash
+git stash list
+git stash apply stash@{1}
+
+Git Reset - git reset is a powerful command that is used to undo local changes to the state of a repo
+To reset staging area
+	git reset <filename>
+	git reset .
+To reset the changes from both Staging area and working directory at a time
+	git reset --hard
+
+Git Revert - The revert command helps you undo an existing commit
+	It does not delete any data in this process instead git creates a new commit with the included files reverted to their previous state
+	So, your version control history moves forward while the state of your file moves backwards.
+
+	reset --> before commit
+	revert --> after commit
+
+To remove untracted files
+	git clean -n (dry run)
+	git clean -f (forcefully)
+
+Tags - Tag operation allows giving meaning to a specific version in the repository
+
+To apply tag
+	git tag -a <tagname> -m <message> <commit-id>
+To see the list of Tags
+	git tag
+To see particular commit content by using tag
+	git show <tag_name>
+To delete a tag
+	git tag -d <tag_name>

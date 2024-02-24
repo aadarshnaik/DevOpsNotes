@@ -1,0 +1,405 @@
+AWS Budgets
+-------------
+To get access to Billing Dashboard for IAM User from Root Account
+    IAM User and Role Access to Billing Information > edit > Activate IAM Access
+From IAM User Account with Admin access
+This will send email for any spend Incurred
+    My Account > My Billing Dashboard > Budgets > Zero Spend Budgets > enter email > Create Budget 
+    My Account > My Billing Dashboard > Budgets > Monthly Cost Budgets > Enter Budget Amount > enter email > Create Budget 
+
+
+EC2 Basics
+------------
+EC2 is one of the most populat of AWS offering
+EC2 = Elastic Compute Cloud = Infrastructure as a Service
+It mainly consists in the capability of:
+    Renting virtual Machines (EC2)
+    Storing data on virtual drives (EBS)
+    Distributing load across machines (ELB)
+    Scaling the services using an auto-scaling group (ASG)
+Knowing EC2 is fundamental to understand how the Cloud works
+
+EC2 sizing & configuration options
+------------------------------------
+Operating System (OS): Linux, Windows or Mac OS
+How muct compute power & cores (CPU)
+How much random-access memory (RAM)
+How much storage space:
+    Network-attached (EBS & EFS)
+    hardware (EC2 Instance Store)
+Network card: speed of the card, Public IP address
+Firewall rules: security group
+Bootstrap script (configure at first launch): EC2 User data
+EC2 User data  
+    It is possible to bootstrap our instances using an EC2 User data script.
+    bootstrapping means launching commaands when machine starts
+    That script is only run once at the instaance first start
+    EC2 user data is used to automate boot tasks such as:
+        Installing updates
+        Installing software
+        Downloading common files from the internet
+        Anything you can think of 
+    The EC2 User Data Script runs with the root user
+
+EC2 Instance types
+--------------------
+General purpose  -- t2.micro , m5.large etc
+Compute Optimized -- Batch processing, Scientific Modelling, Computer intensive applications -- c6g.large , c5.large etc
+Memory Optimized -- Analytics, In-Memory Databases -- r5.large , x1.16xlarge etc
+Acclerated Computing Instance -- Deep Learning, Machine Learning, Seismic Analysis, High floating point workloads -- p3.2xlarge , p2.xlarge etc
+Storage Optimized -- NoSQL Database, Data Warehousing, High disk performance workloads etc --   i3.large , d2.xlarge etc
+
+Security Groups
+----------------
+Security Groups are the fundamental of network security in AWS
+They control how traffic is allowed into or out of our EC2 instances
+SG only contain allow rules
+SG rules can reference by IP or by security group
+
+Security Groups - Good to Know
+-------------------------------
+Can be attached to multiple instances
+Locked down to a region/VPC combination
+Does live "outside" the EC2 - if the traffic is blocked the EC2 instance won't see It
+Its good to maintain one seperate security group for SSH access
+If your application is not accessible (time out), then its security group issue
+If your application gives a "connection refused" error, then its an applocation error or its not launched
+All inbound traffic is blocked by default
+All outbound traffic is authorised by default
+
+Classic Ports to Know
+-----------------------
+22 = SSH (Secure Shell) - log into a Linux instance
+21 = FTP (File Transfer Protocol) - upload files into a file share
+22 = SFTP (Secure File Transfer Protocol) - upload files using SSH
+80 = HTTP - access unsecured websites
+443 = HTTPS - access secured websites
+3389 = RDP (Remote Desktop Protocol) - log into a Windows instance
+
+SSH 
+-----
+How to SSH into EC2 Instance Linux/Mac OS X
+- SSH is one of the most important function. It allows you to control a 
+  remote machine, all using command line
+   
+SSH Troubleshooting
+--------------------
+This is a security group issue. Any timeout (not just ssh) is related to security Groups
+or a firewall. Ensure your security group looks like this and correctly
+assigned to your EC2 instance.
+
+EC2 Instance connection
+-------------------------
+Its a browser based ssh session into an instance 
+
+EC2 Instance Roles
+--------------------
+It is very unsafe to do aws configure in an EC2 Instance as it could be accessed by everyone
+We use IAM Roles instead.
+For any instance > Actions > Security > Modify IAM Role
+we can add our roles with appropiate permissions to do a task
+
+EC2 Instances Purchasing options
+---------------------------------
+On-Demand Instances - short workload, predictable pricing, pay by second
+Reserved (1 & 3 years)
+    Reserved Instances - long workloads
+    Convertible Reserved Instances - long workloads with flexible instances
+Savings Plans (1 & 3 years) - commitment to an amount of usage, long workload
+Spot Instances - short workloads, cheap, can lose instances
+Dedicated Hosts - book an entire physical server; control instance placement
+Dedicated Instances - no other customers will share your hardware
+Capacity Reservations - reserve capacity in a specific AZ for any duration
+
+EC2 On Demand
+---------------
+Pay for what you use:
+    Linux or Windows - billing per second, after the first minute
+    All other operating systems - billing per hour
+Has the highest cost but no upfront payment
+No long-term commitment
+Recommended for sshort-term and un-interrupted workloads, where
+you can't predict how the application will behave
+
+EC2 Reserved Instances
+------------------------
+Upto 72% discount compared to On-Demand
+You reserve a specific instance attributes (Instance Type, Region, Tenancy, OS)
+Reservation Period - 1 year (+discount) or 3 years (+++discount)
+Payment Options - No Upfront(+), Partial Upfront(++), All Upfront(+++)
+Reserved Instance's Scope - Regional or Zonal (reserve capacity in an AZ)
+Recommended for steady-state usage applications (think database)
+You can buy and sell in the Reserved Instance Marketplace
+Convertible Reserved instance
+    Can change the EC2 instance type, instance family, OS, scope and Tenancy
+    Up to 66% discount
+
+EC2 Savings Plans
+------------------
+Get a discount based on long term usage (upto 72% - same as RIs)
+Commit to a certain type of usage ($10/hour for 1 or 3 years)
+Usage beyond EC2 Savings Plans is billed at the On-Demand price
+Locked to a specific instance family & AWS region (eg., M5 in us-east-1)
+Flexible across:
+    Instance Size (e.g., m5.xlarge, m5.2xlarge)
+    OS (e.g., Linux, Windows)
+    Tenancy (Host, Dedicated, Default)
+
+EC2 Spot Instances
+--------------------
+Can get a discount of upto 90% compared to On-Demand
+Instances that you can "lose at any point of time if your max price is less than the current spot price"
+The MOST cost-efficient instances in AWS
+
+Useful for workloads that are resilient to failure
+    Batch jobs
+    Data Analysis
+    Image processing
+    Any distributed workloads
+    Workloads with a flexible start and end time
+Not suitable for critical jobs or databases
+
+EC2 Dedicated Hosts
+--------------------
+A physical server with EC2 instance capacity fully dedicated to your use
+Allows you to address compliance requirements and use your existing server-bound software 
+licenses (per-socket, per-core, pe-VM software licenses)
+Purchasing Options:
+    On-demand - pay per second for active Dedicated Host.
+    Reserved - 1 or 3 years (No Upfront, Partial Upfront, All Upfront)
+The most expensive option
+Useful for software that have complicated licensing model (BYOL - Bring Your Own License)
+Or for companies that have strong regulatory or compliaance needs
+
+
+EC2 Dedicated Instances
+------------------------
+Instances run on hardware that's dedicated to you
+May share hardware with other instances in same Account
+No control over instance placement (can move hardware after Stop/Start)
+
+EC2 Capacity Reservations
+--------------------------
+Reserve On-Demand instances capacity in a specific AZ for any duration
+You always have access to EC2 capacity when you need it
+No time commitment (create/cancel anytime), no billing discounts
+Combine with Regional Reserved Instances and Savings Plans to benefit from billing discounts
+You're charged at On-Demand rate whether you run instaances or not
+Suitable for short-term, uninterrupted workloads that needs to be in a specific AZ
+
+
+Which Purchasing option right for me ? [ RESORT ANALOGY ]
+------------------------------------------------------------
+On demand: coming and staying in resort whenever we like, we pay the full price
+Reserved: like planning ahed and if we plan to stay for a long time, we may get good discount
+Savings Plans: pay a certain amount per hour for certain period and stay in any room type (eg., King, Suite, Sea View,....)
+Spot instances: the hotel allows people to bid for the empty rooms and the highest bidder keeps the rooms. 
+                You can get kicked out any time.
+Dedicated Hosts: We book an entire building for resort
+Capacity Reservations: You book a room for a period with full price even you don't stay in it
+
+
+EC2 Spot Instance Requests
+---------------------------
+Can get a discount of upto 90% compared to On-demand
+
+Define max spot price and get the instance while current spot price < max
+    The hourly spot price veries based on offer and capacity
+    If the current spot proce > your max price you can choose to stop or terminate your instance with a 2 minutes grace period
+Other strategy: Spot Block
+    "block" spot instance during a spefified time frame (1 to 6 hours) without interruptions
+    In rare situations, the instance may be reclained
+Used for Batch Jobs, data analysis, or workloads that are resilient to failures
+Not great for critical jobs or databases 
+
+There are 2 types of Spot Instance Requests
+    One-time - As soon as Spot request is fullfilled, instances will be launched and then spot request will go away
+    Persistant - Till the spot request is valid we want the instances to be up. If instances go down, the spot request 
+                 will go into action and once its validated it'll restart instances.
+
+To remove spot instances. we can only cancel Spot Instance requests that are open, active, or disabled
+Cancelling a Spot request does not terminate instances
+We must first cancel a Spot request, and then terminate the associated Spot Instances
+
+    Spot Fleets
+    ------------
+    Spot Fleets = set of Spot Instances + (optional) On Demand Instances
+    The spot fleet will try to meet the target capacity with price constraints
+        Define possible launch pools: instance type (m5.large), OS, Availability Zone
+        Can have multiple launch pools, so that the fleet can choose
+        Spot fleet stops launching instances when reaching capacity or max cost
+    Strategies to allocate Spot Instances:
+        lowestPrice: from the pool with lowest price (cost optimization, short workload)
+        diversified: distributed across all pools (great for availability, long workloads)
+        capacityOptimized: pool with the optimal capacity for the number of instances
+    Spot Fleets allow us to automatically request Spot Instances with the lowest price
+    
+
+Private vs Public IP (IPv4)
+-----------------------------
+
+Networking has two sorts of IPs. IPv4 and IPv6
+    IPv4: 1.160.10.240
+    IPv6: 3ffe:1900:4545:3:200:f8ff:fe21:67cf
+
+IPv4 is still the most common format used online
+IPv6 is newer and solves problems for the Internet of Things (IoT).
+IPv4 allows for 3.7 billion different addresses in the public space
+IPv4: [0-255].[0-255].[0-255].[0-255].
+
+    Fundamental Differences
+    ------------------------
+    Public IP:
+        Public IP means the machine can be identified on the internet (WWW)
+        Must be unique across the whole web (not two machines can have the same public IP).
+        Can be geolocated easily
+
+    Private IP:
+        Private IP means the machine can only be identified on a private network only
+        The IP must be unique across the private network
+        BUT two different private networks (two companies) can have the same IPs.
+        Machines connect to WWW using a NAT + internet gateway (a proxy)
+        Only a specified range of IPs can be used as private IP
+
+    Elastic IPs
+        When we stop and start an EC2 instance, it can change its public IP.
+        If you need to have a fixed public IP for your instance , you need an Elastic IP
+        An Elastic IP is a public IPv4 IP you own as long as you don't delete it
+        You can attach it to one instance at a time
+
+        With an Elastic IP address, you can mask the failure of an instance or 
+        software by rapidly remapping the address to another instance in your account
+        
+        We can only have 5 Elastic IP in your account (you can ask AWS to increase that).
+
+        Overall we must try to avoid using Elastic IP:
+            They often reflect poor architectural decisions
+            Instead, use a random public IP and register a DNS name to it
+            We can use Load Balancer and don't use a public IP
+
+    In AWS EC2
+        By default, EC2 machine comes with:
+            A private IP for the internal AWS Network
+            A public IP, for the WWW.
+        When we are doing SSH into our EC2 machines:
+            We can't use a private IP, because we are not in the same network
+            We can only use the public IP.
+        If EC2 machine is stopped and then started, the public IP can change
+
+
+
+EC2 Placement Groups
+---------------------
+Sometimes we want control over the EC2 Instance placement strategy
+That Strategy can be defined using placement Groups
+When we create a placement group, we specify one of the following strategies 
+for the group:
+    Cluster - clusters instances into a low-latency group in a single Availability Zone
+    Spread - spreads instances across underlying hardware (max 7 instances per group per AZ) - critical applications
+    Partition - spreads instances across many different partitions (which rely on different sets of racks) within
+                an AZ. Scales to 100s of EC2 instances per group (Hadoop, Cassandra, Kafka)
+
+
+    Cluster: 
+        Pros: Great network (10Gbps bandwidth between instances)
+        Cons: If the rack fails, all instances fails at the same time
+        Use Case:
+            Big Data job that needs to complete fast
+            Application that needs extremely low latency and high network throughput
+
+    Spread: All EC2 will be located on different hardware  
+        Pros: Can span across Availability Zones (AZ)
+              Reduced risk is simultaneous failure
+              EC2 Instances are on different physical hardware
+        Cons: Limited to 7 instances per AZ per placement group
+        Use case:
+            Application that needs to maximize high availability
+            Critical Applications where each instance must be isolated from each other
+
+    Partition:
+        Upto 7 partitions per AZ
+        Can span across multiple AZs in the same region
+        Up to 100s of EC2 instances
+        The instances in a partition do not share racks with the instances in the other partitions
+        A partition failure can affect many EC2 but won't affect other partitions
+        EC2 instances get access to the partition information as metadata
+        Use cases:
+            HDFS, HBase, Cassandra, Kafka
+
+
+    Hands-On:
+        Under Network and Security > Placement Groups > Create Placement Group > 
+        Select placement strategy > Create Group
+        While launching EC2 Instance > Advanced Details > Placement Group name > Select appropiate group
+
+
+
+
+Elastic Network Interface (ENI)
+--------------------------------
+Logical component in a VPC that represents a virtual network card
+The ENI can have the following attributes:
+    Primary private IPv4, one or more secondary IPv4
+    One Elastic IP (IPv4) per private IPv4
+    One IP Public IPv4
+    One or more security Groups
+    A MAC address
+You can create ENI independently and attach them on the fly (move them) on EC2 instances for failover
+Bound to a specific availability zone (AZ)
+    
+    Hands-On:
+        - We create 2 EC2 Instances which have 2 ENI's. We can see the 
+          ENI's in Network interfaces under Instances
+        - We create a new Network Interface
+          Give Description
+          Choose Subnet same as EC2 Instances
+          We can choose a IPv4 or auto-assign 
+          Attach a SG
+          Create a new ENI
+          Select new ENI > Action > Attach > Choose Instance > Attach
+          
+    Now the new ENI is attached to EC2 Instance. This new ENI we have 
+    control over, so we could move it from one EC2 Instance to another.
+    We can do a quick and easy network failover between the two instances by
+    moving an ENI.
+
+    To connect it to another Instance in case of network failover 
+        Select ENI > Actions > Detach > Detach/Force Detach
+        Then we can choose other instance
+
+By creating our own ENI's we have more control over IPv4 and more control over
+Networking and that could be helpful in some type of advance use cases
+
+
+
+EC2 Hibernate
+---------------
+We know we can stop, terminate instances
+    Stop - the data on disk (EBS) is kept intact in the next start
+    Terminate - any EBS volumes (root) also set-up to be destroyed is lost
+
+On start, the following happens:
+    First start: the OS boots & the EC2 User Data script is run
+    Following starts: the OS boots up
+    Then your application starts, caches get warmed up, and that can take time!
+
+Introducing EC2 Hibernate:
+    - The in-memory (RAM) state is preserved
+    - The instance boot is much faster! (the OS is not stopped/restarted)
+    - Under the hood: the RAM state is written to a file in the root EBS volume
+    - The root EBS volume must be encrypted
+
+Use Cases: 
+    Long-running processing
+    Saving the RAM state
+    Services that take time to initialize
+
+Supported Instance Families - C3, C4, C4, I3, M3, M4, R3, R4, T2, T3, ...
+Instance RAM Size - must be less than 150 GB.
+Instance Size - not supported for bare metal instances.
+AMI - Amazon Linux 2, Linux AMI, Ubuntu, RHEL, CentOS & Windows...
+Root Volume -  must be EBS, encrypted, not instance store, and large
+Available for On-Demand, Reserved and Spot Instances
+An instance can NOT be hibernated more than 60 days
+
+

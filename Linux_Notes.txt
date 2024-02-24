@@ -1,0 +1,428 @@
+Linux Basics
+---------------------------------------------------------------------------------------------------------------------------
+Linux Principles
+
+- Everything is a file(Including Hardware)
+- Small Single purpose Programs
+- Ability to chain programs together for complex operations
+- Avoid Captive User Interface
+- Configuration data stored in text file
+
+RPM based :- RHEL, Centos, Oracle Linux, Amazon Linux
+Debian :- Ubuntu Server, Kali Linux
+
+
+
+Directories :-
+-------------------------
+
+- Home Directories: /root, /home/username
+- User Executable: /bin, /usr/bin, /usr/local/bin
+- System Executable: /sbin, /usr/sbin, /usr/local/sbin
+- other mountpoints: /media, /mnt
+- Configuration: /etc
+- Temporary Files: /tmp
+- Kernels and Bootloader: /boot
+- Server Data: /var, /srv
+- System Information: /proc, /sys
+- Shared Libraries: /lib, /usr/lib, /usr/local/lib
+
+To get operating system info we use
+$cat /etc/os-release
+
+#/boot/initramfs-3.10.0-1160.el7.x86_64.img => Bootloader
+#/boot/vmlinuz-3.10.0-1160.el7.x86_64 => kernel
+
+# cd /boot/grub2/ => Configuration for booting
+
+# cd /proc/
+proc# uptime => to see uptime and how many users are logged in. 
+
+Command   options   arguments
+cp 		-r	  dev bakupdir/
+ls
+ls 		-l	  /tmp/
+
+
+
+Vim Editor
+------------------
+3 modes in vim editor
+- command mode
+- insert mode
+- extended mode
+
+: in vim editor -> extended mode
+esc in vim editor -> command mode
+
+:se nu => to get line numbers on vim editor
+Shift + g to go to last line
+Shift + GG to go to first line
+yy to copy any line y means yanking
+p to paste below 
+P to paste above
+dd is to delete lines
+yy + p => copy paste
+dd + p => cut paste
+u to undo in command mode
+
+
+
+Files in Linux
+---------------------
+#file yum -> to know the file type
+
+- Regular File   for Normal files such as text, data or executable
+d Directory      for Files that are lists of other files
+l Link     	     for a shortcut that points to the location of the actual file
+c Special file   for mechanism used for input and output, such as files in /dev
+s Socket         for a special file that provides inter process networking protected by the file system's access control.
+p Pipe           for a special file that allows processes to communicate with each other without using network socket semantics.
+
+to make interdirectory using mkdir
+mkdir -p /opt/dev/ops/devops/test
+
+To change hostname
+	#vim /etc/hostname
+	#hostname centos7.devops.in
+
+ln -s <originalFilePath> <LinkFilePath> is used to create softlink/Link
+
+
+
+Filters and redirection
+--------------------------
+# grep firewall <filename>
+grep -i firewall <filename> => IgnoreCaseSensitivity
+< is for input redirection symbol
+	eg. grep -i firewall < filename.cfg
+for Directory
+# grep -iR firewall *
+-R is used for directory
+
+# grep -R SELINUX /etc/*
+# grep -vi <keyword> <filename> => Opposive search
+
+less & more are file reader. we use q to quit
+#head <filename> => to see first 10 lines.
+#head -20 <filename> => to see first 20 lines.
+
+#tail <filename> => last 10 lines of a file
+#tail -2 <filename> => last 2 lines of a file
+
+#tail -f filepath => dynamic content
+
+to check logs => /var/log/
+tail -f /var/log/messages => log files of OS dynamically
+
+-d delimiters are colon or comma (: or ,)
+To get data from a file properly segregated by delimiters we can use cut to get data
+
+# cut -d: -f1 /etc/passwd
+
+f1 is field1/column1
+
+for cut command delimiters are very important
+
+#awk -F':' '{print $1}' /etc/passwd
+$1,$2,$3 are columns
+
+Search and Replace =>
+
+Inside the file:
+	:%s/coronavirus/covid19/g
+	g means globally
+
+	If we replace a keyword with nothing the keyword is omitted
+	:%s/covid19//g
+Outside the file:
+	To see the file:
+		sed 's/coronavirus/covid19/g' samplefile.txt
+		sed 's/coronavirus/covid19/g' *
+	To change the content:
+		sed -i 's/coronavirus/covid19/g' samplefile.txt
+
+
+
+I/O Redirection
+----------------
+# uptime > /tmp/sysinfo.txt
+# free -m => Memory utilization (RAM)
+# df -h => Space Utilization
+# date for date Information
+# df -kh => List out the file systems.
+# df -sch /<mount_point> to select.
+
+If we dont want to see output we can redirect to to /dev/null/. Its a blackhole
+to clear all contents of a file we can use /dev/null
+
+#cat /dev/null > /tmp/sysinfo.txt  => wipes sysinfo.txt file clean
+
+freeeee -m 2 >> /tmp/error.log => 2 is for standard error.
+& >> is to redirect and append all the output to file (Output and Error both)
+
+wc -l => To count lines
+
+# ls | wc -l
+# ls | grep host
+
+#find /etc -name host
+
+#yum install mlocate -y
+# updatedb
+#locate <keyword>
+
+
+
+Users and Groups
+------------------------
+Username  LinkToShadowFile userid groupid comment homeDir          loginShell
+--------  ---------------- ------ ------- ------- -------          ----------
+root     :  x             :  0   :   0   :root   :/root          : /bin/bash
+vagrant  :  x		  : 1000 : 1000  :vagrant:/home/vagrant  : /bin/bash
+
+User info file is /etc/passwd and group info file is /etc/group
+
+all groups /etc/group
+
+useradd ansible
+useradd jenkins
+useradd aws
+
+groupadd devops
+
+To add users to group 
+
+	usermod -aG devops ansible
+	-G is for secondary/supplementary group
+	-g is for primary group
+We can directly edit the group file also
+	vim /etc/group
+
+#passwd username => To give password to users
+root user can reset any users password by using passwd username command, 
+also user can reset its own password by running just passwd command
+
+users password is stored in /etc/shadows file.
+
+#last to see users logged in to the system
+
+lsof will list all opened files by the current user
+#lsof -u vagrant
+
+To delete a user
+#userdel <username>
+To remove an user 
+#userdel -r jenkins
+
+To delete a group
+#groupdel devops
+
+
+
+File permissions
+--------------------
+r => read
+w => write
+x => execute
+
+- => filetype
+rw- => User
+--- => group
+--- => others
+
+
+To check file permissions for directory we can use #ls -ld /opt/devopsdir
+
+We create 4 user and 1 group
+useradd ansible
+useradd jenkins
+useradd aws
+useradd miles
+groupadd devops
+
+[root@centos opt]# id jenkins
+uid=1002(jenkins) gid=1003(jenkins) groups=1003(jenkins),1001(devops)
+[root@centos opt]# id ansible
+uid=1001(ansible) gid=1002(ansible) groups=1002(ansible),1001(devops)
+[root@centos opt]# id aws
+uid=1003(aws) gid=1004(aws) groups=1004(aws),1001(devops)
+[root@centos opt]# id miles
+uid=1004(miles) gid=1005(miles) groups=1005(miles)
+[root@centos opt]#
+
+
+To add a user in sudo privilages. Th file is in /etc/sudoers
+
+# visudo - 
+line 100 around add the user like root
+
+100 root    ALL=(ALL)       ALL
+101 ansible ALL=(ALL)      NOPASSWD:ALL
+
+NOPASSWD is added to /etc/sudoers so that it doesnt ask password while
+switching to root user.
+
+sudo -i cannot by used by all users for root user. we need to add users 
+in /etc/sudoers or /etc/sudoers.d
+
+curl command is used to access a link or download content also
+[root@centos ~]# curl https://rpmfind.net/linux/centos/7.9.2009/os/x86_64/Packages/tree-1.6.0-10.el7.x86_64.rpm -o tree-1.6.0-10.el7.x86_64.rpm
+
+To install package:
+	rpm -ivh tree-1.6.0-10.el7.x86_64.rpm
+
+to list all the packages to install
+	rpm -qa
+to erase a package 
+	rpm -e <rpm name>
+
+better option to download and install package is yum. It does by using some configuration file/
+yum repository is located at  ===>	cd /etc/yum.repos.d/
+apt repository is located at  ===>  /etc/apt/sources.list & /etc/apt/sources.list.d
+
+To install packages we use 
+rpm -i packagename in RedHat OS
+dpkg -i packagename in Debian OS
+
+
+
+
+Services
+------------
+# yum instal httpd
+
+httpd can be managed by systemctl command
+
+systemctl status httpd
+systemctl start httpd
+systemctl restart httpd
+systemctl reload httpd
+
+To get a service at boot time 
+#systemctl enable httpd
+
+To check ssh status
+#systemctl status sshd
+
+To check if a service is active
+#systemctl is-active httpd
+#systemctl is-enabled httpd
+
+
+
+
+Processes
+----------------
+# top => Task Manager in Windows -- Dynamic
+# ps aux -- Static Task Manager
+
+[root@centos ~]# ps -ef | grep httpd
+root      1570     1  0 18:14 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
+apache    1571  1570  0 18:14 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
+apache    1572  1570  0 18:14 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
+apache    1573  1570  0 18:14 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
+apache    1574  1570  0 18:14 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
+apache    1575  1570  0 18:14 ?        00:00:00 /usr/sbin/httpd -DFOREGROUND
+root      1587  1328  0 18:28 pts/0    00:00:00 grep --color=auto httpd
+[root@centos ~]# kill 1570
+[root@centos ~]# ps -ef | grep httpd
+root      1595  1328  0 18:29 pts/0    00:00:00 grep --color=auto httpd
+
+To forcefully shutdown a process we use
+
+[root@centos ~]# kill -9 1570
+
+Filtering and force Kill :
+[root@centos ~]# ps -ef | grep httpd | grep -v 'grep' | awk '{print $2}'
+1603
+1604
+1605
+1606
+1607
+1608
+[root@centos ~]# ps -ef | grep httpd | grep -v 'grep' | awk '{print $2}' | xargs kill -9
+[root@centos ~]#
+
+To check processes with their parent process id we use 
+#ps -ef
+
+A child process that remains running even after its parent process is terminated or completed without waiting for child process execution
+is called a Orphan process. Zombie process that has completed its task but still, it shows an entry in a process table 
+
+
+
+
+Archiving
+-------------
+To compress and tar we use:
+# tar -czvf jenkins_26042022.tar.gz jenkins
+
+To extract
+# tar -xzvf jenkins_26042022.tar.gz
+To extract it somewhere else:
+# tar -xzvf jenkins_26042022.tar.gz -C /opt/
+
+To zip:
+yum install zip unzip -y
+
+zip -r jenkins_26042022.zip jenkins
+unzip jenkins_26042022.zip
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+/root/usr --> read only user application support data & binaries
+	/root/usr/bin --> most user commands
+	/root/usr/include --> standard include files for 'C' code
+	/root/usr/lib --> obj, bin, lib files for coding and packages
+	/root/usr/local --> local software
+	/root/usr/share --> static data sharable across all architectures
+		/root/usr/share/man --> manual pages
+
+
+To set environment variable 
+
+export env hello="world"
+env -u hello
+unset hello
+
+Date format (SHOW)
+
+date +"%m-%d-%Y"
+m = 2 digit for month
+d = 2 digit for day
+Y = 4 digit for Year
+
+Displays the date as 11-07-2023
+
+Date format (show)
+
+date +"%m%d%H%M%Y.%S"
+m = 2 digit month
+d = 2 digit day
+H = 2 digit Hour
+M = 2 digit Minute
+Y = 4 digit Year
+S = 2 digit Sec
+
+Displays date and time as
+071121132023.55
+
+
+getent passwd same as vi /etc/passwd
+getent group same as vi /etc/group
+
+Ctrl + Z to stop/freeze a process
+
+sort command in linux happens based on ascii dictionary
+
+If a file has integers and we give sort file_name, it will sort in ascii order
+to make it numeric sorting we can do sort -n file_name
+
+cat listofitems.txt | uniq -> to get unique list but unique elements should be adjacent to each other
+
+
+
+

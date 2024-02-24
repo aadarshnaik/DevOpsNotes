@@ -1,0 +1,132 @@
+Infrastructure as Code
+------------------------
+Types of IAC Tools
+    Configuration Management
+    Server Templating
+    Provisioning Tools
+
+Configuration Management (Ansible, chef, puppet, saltstack):
+    These are commonly used to install and manage software on existing Infrastructure resources 
+    such as servers, Databases, networking devices etc.
+        Designed to install and Manage software
+        Maintains Standard Structure
+        Version Control
+        Idempotent (Make only necessary changes) 
+
+Server Templating Tools (Docker, HashiCorp Packer, Vagrant):
+    These are used to create a custom image of virtual machine or a container
+        Pre Installed Software and Dependencies
+        Virtual Machine or Docker Images
+        Immutable Infrastructure
+
+Provisioning Tools (Terraform, CloudFormation):
+    These tools are used to provison Infrastructure components using simple declarative code 
+        Deploy Immutable Infrastructure resources
+        Servers, Databases, Network Components etc.
+        Multiple Providers
+
+
+Terraform
+------------
+Free and OpenSource Infrastructure Provisioning tool developed by HashiCorp
+It supports All type of Infrastructure (Physical Machines, VMWare, AWS, GCP, Azure)
+
+Terraform manages infrastructure on so many different kinds of platforms with the help of providers
+A provider helps Terraform manage third party platforms through their API
+
+Providers enable Terraform manage cloud platforms like AWS, GCP, Azure as well as
+Network Infrastructure like BigIP, CloudFlare, DNS, Palo Alto Networks, Infoblox
+Monioring and Data Managemnet tools like DataDog, Grafana, Auth0, Wavefront and Sumo Logic
+Databases like InfluxDB, MongoDB, MySQL, PostgreSQL, VCS(GitHub, BitBucket, GitLab)
+
+Terraform uses HCL (HashiCorp Configuration Language)
+
+HashiCorp Configuration Language
+---------------------------------
+main.tf
+--------
+resource "aws_instance" "webserver" {
+    ami           = "ami-0edab4b345tyf99834"
+    instance_type = "t2.micro"
+}
+resource "aws_s3_bucket" "finance" {
+    bucket = "finanace-21092020"
+    tags   = {
+        Description = "Team Leader"
+    }
+}
+resource "aws_iam_user" "admin-user" {
+    name = "lucky"
+    tags = {
+        Description = "Team Leader"
+    }
+}
+
+Code is Declarative
+Code we define is the state that we want our infrastructure to be in
+
+Terraform goes from Declarative code state to Real world Infrastructure state in 3 phases
+Init - Identifies the providers to be used for the target environment
+Plan - Terraform drafts a plan to get to the target state 
+Apply - Makes the necessary changes required on the target environment to bring it to desired state
+
+Every component Terraform manages is resource
+Resource can be a compute instance, a database sercer in cloud or on-premise.
+Terraform manages lifecycle of resources from its provisioning to Configuration to decomissioining
+
+Terraform records the state of infrastructure as it is seen in real world
+and based on this it can determine what actions should take when updating resources for a particular platform
+
+Terraform can ensure that entire infrastructure is always at the defined state at all times
+State is a blueprint of the infrastructure defined by Terraform
+
+Terraform can read attributes of existing infrastructure components by configuring data sources
+This can later be used to configure other resources within Terraform
+
+Terraform can also import other resources outside of Terraform that were either created manually or by the means 
+of other IAC tools and bring it under its control so that it can manage the resource going forward 
+
+
+
+HashiCorp Configuration Language (HCL) - Basics
+-------------------------------------------------
+
+<block> <parameters> {
+    key1 = value1
+    key2 = value2
+}
+
+We want to create a file in the local system where Terraform is Installed
+ 
+$ mkdir /root/terraform-local-file
+$ cd /root/terraform-local-file
+
+local.tf
+-----------
+resource "local_file" "pet" {
+    filename = "/root/pets.txt"
+    content = "We love pets!"
+}
+
+A simple terraform workflow consists of 4 steps
+
+    1. Write Configuration file
+    2. Run the terraform init command
+    3. Review the execution plan using the terraform plan command
+    4. Apply changes using terraform apply command
+
+
+Update and Destroy Infrastructure using Terraform
+---------------------------------------------------
+
+resource "local_file" "pet" {
+    filename = "/root/pets.txt"
+    content = "We love pets!"
+    file_permission = "0700"
+} 
+
+$ terraform plan
+$ terraform apply
+
+To delete infrastructure completely
+$ terraform destroy

@@ -1,0 +1,152 @@
+JENKINS
+----------------
+
+Issues faced before CI:
+	Long waits to test code
+	Difficult to Debug
+	Slow Software Delivery Process
+	Infrequent Feedback Cycles
+
+Continuous Integration is a development practice in which the developers are required to commit changes to the source code in a shared repository several times a day or more frequently.
+
+Jenkins is an open source automation tool written in Java with plugins built for Continuous Integration purpose. Plugins allows integration of various DevOps stages.
+
+Master-Slave Topology - In a Organization we have teams who want to build and deploy their own pipeline or deploy their own software project codes. Teams don't want their code to run on a server which is owned by some other teams. 
+We can setup a master slave topology where Jenkins can run on server X but we can connect multiple other servers which can act as a slave so when we are deploying a code or executing a pipeline you can run those codes on those YZ servers. 
+
+Jenkins Pipeline is a combination of plugins that support the integration and implementation of continuous delivery pipelines using Jenkins. A pipeline has an extensible automation server for creating complex delivery pipelines as code
+
+// Example of Jenkins pipeline script
+
+pipeline {
+	stages {
+		stage("Build") {
+			steps {
+				// Just print a Hello, Pipeline to the console
+				echo "Hello, Pipeline!"
+				// Compile a Java file. This requires JDKconfigurations from Jenklins
+				javac HelloWorld.java
+				// Execute the compiled Java binary called HelloWorld. This requires JDK configuration from Jenkins
+				java HelloWorld
+				// Executes the Apache Maven commands, clean the package. This requires Apache Maven configuration from Jenkins
+				mvn clean package ./HelloPackage
+				// List the files in current directory path by executing a default shell command
+				sh "ls -ltr"
+			}
+		}
+		// And next stages if you want to define further
+	}   // End of stages
+}       // End of pipeline
+
+SCRIPTED vs DECLARATIVE PIPELINE
+----------------------------------
+Scripted Pipeline
+	Strict & Traditional Syntax
+	Code is written on a Jenkins UI Instance
+	Code is defined within a "Node Block"
+
+Declarative Pipeline
+	Simpler Groovy Syntax
+	Code is written into a file & checked into SCM
+	Code is defined within a "Pipeline Block"
+
+A Jenkinsfile is a text file that contains the definition of a 
+Jenkins Pipeline and is checked into source control. It provides a number 
+of immediate benefits such as code review, audit trial & a single source of 
+truth for the Pipeline
+
+Jenkins Workflow: Developer --> Source Code Repo --> Jenkins Server --> Testing
+                                                                   |--> Production
+
+Steps to Install Jenkins
+1. Add the universe repository with the command sudo add-apt-repository universe 
+2. Update apt with the command sudo apt-get update
+3. Install Jenkins with the command sudo apt-get install jenkins -y
+
+Jenkins Architecture
+------------------------
+Developers commits code to Git Repository, Jenkins check the shared repository
+at periodic intervals and every checkin is pulled and then build. Jenkins deploys
+the build application on the test server. The build application is then
+deployed to the production server.
+
+A single Jenkins server was not enough to meet certain requirements.
+Sometimes we need several different environments to test. If larger and heavier 
+projects get build on a single jenkins server on a regular basis then single 
+jenkins server cannot handle the entire load. So Jenkins Distributed 
+architecture came into picture
+
+There is a Jenkins Master and Slaves
+Jenkins Master will distribute its workload to the Slaves
+Jenkins Slaves are generally required to provide the desired environment.
+It works on the basis of requests received from Jenkins Master.
+Master and Slave communicate through the tcp/ip protocol
+
+To start Jenkins from command line go to jenkins install path
+java -jar jenkins.war --httpPort=9191
+
+Developers commit code to Code repo, this repository will compile and execute the code
+and send it to the QA team, Testers will manually perform test like Unit test and Integration
+testing to check if there are any logical errors in the code and once they are done 
+fixing the errors they will directly deploy the app to production but this resulted 
+in failure. 
+Reason being testing and prod environments are different, Production server is 
+not capable enough to handle end user load, App not accessible to intended audience
+
+Advantages of Continuous Delivery
+- Automates software release
+- Increases developer productivity
+- Locates and addresses bugs quicker
+
+Jenkins Pipeline - Its a single platform that runs the entire pipeline as code
+All the standard jobs defined by Jenkins are manually written in one script and they can be stored in a VCS
+Instead of building several jobs for each phase, you can now code the entire workflow and put it in a Jenkinsfile
+
+Jenkinsfile
+---------------
+pipeline {
+	agent any
+		stages {
+			stage('One') {
+				steps {
+					echo "Hi, this is Aadarsh"
+				}
+			}
+			stage('Two') {
+				steps {
+					input ('Do you want to proceed?')
+
+				}
+			}
+			stage('Three') {
+				when {
+					not {
+						branch "master"
+					}
+				}
+				steps {
+					echo "Hello"
+				}
+			}
+			stage('Four') {
+				parallel {
+					stage('Unit Test') {
+						steps {
+							echo "Running the unit test..."
+						}
+					}
+					stage('Integration test') {
+						agent {
+							docker {
+								reuseNode false
+								image 'ubuntu'
+							}
+						}
+						steps {
+							echo 'Running the integration test..'
+						}
+					}
+				}
+			}
+		}
+}

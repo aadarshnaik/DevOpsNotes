@@ -1,0 +1,59 @@
+Vagrant Basics
+---------------------------------------------------------------------------------------------------------------------------
+Vargrant Manages/Automates VM Lifecycle 
+
+1. To create a vagrant file we use $vagrant init geerlingguy/centos7 (name from vagrant cloud)
+
+2. $vagrant up (reads the file and creates VM)
+
+	It download the box from the cloud once and that takes a little time. we will be able to see that in virtual box.
+
+3. $vagrant ssh => To connect to new virtual box in the same directory.
+
+4. $vagrant halt => To poweroff VM from same directory.
+
+5. $vagrant destroy => To remove any vm from same directory.
+
+To check status of all the Vm's we have
+$ Vagrant global-status 
+
+In Vagrantfile we can change configuration of the VM
+
+This can be used to sync files in vm. If Vm crashes or closed, sync file directory will be stored.
+config.vm.synced_folder "D:\\myshellscripts","/opt/scripts"
+
+Provisioning -> In Vagrant provisioning means executing commands or scripts when VM comes up.
+We can change provisioning from Vagrantfile itself. Its at the last. Whatever we write between <<-SHELL and SHELL. 
+It executes it during startup.
+If VM is running we need to execute 
+
+	$ vagrant reload --provision 	to execute the provisioning commands.
+
+Server data is located in var directory. /var/www/html/
+
+To start a website from linux server
+1. get the artifact/html or css etc to /var/www/html using wget
+2. systemctl restart httpd
+
+
+Automation for website
+	 yum install httpd wget unzip -y
+	 systemctl start httpd
+	 systemctl enable httpd
+	 cd /tmp/
+	 wget https://www.tooplate.com/zip-templates/2109_the_card.zip
+	 unzip -o 2109_the_card.zip
+	 cp -r 2109_the_card/* /var/www/html/
+	 systemctl restart httpd
+
+Infrastructure as Code (IaC) is the process of managing and provisioning infrastructure 
+(networks, virtual machines, load balancers, and connection topology) through CODE/Config Files.
+
+Vagrant for Local
+Terraform for Cloud
+Ansible for Servers
+Cloudformation for AWS etc.
+
+
+application.properties is used by tomcat server to find information of all the backend services mysql, memcache, RabbitMQ, Elasticsearch.
+In source code it is located at src/main/resources/application.properties

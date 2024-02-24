@@ -1,0 +1,63 @@
+We can use multiple machines to run different service isolated 
+from each other but more computers means more cost of operation.
+A better solution is to use containers.
+
+A container is a directory/miniature OS with Linux OS folder structure
+
+
+Provisioning in Vagrantfile to install docker in Linux
+------------------------------------------------------
+sudo apt-get update
+   sudo apt-get install \
+    ca-certificates \
+	curl \
+	gnupg \
+	lsb-release -y
+	curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+	echo \
+	"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+	$(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+	sudo apt-get update
+	sudo apt-get install docker-ce docker-ce-cli containerd.io -y
+	sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+	sudo chmod +x /usr/local/bin/docker-compose
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+DOCKER IN BRIEF
+------------------
+docker run hello-world
+docker images
+docker ps
+docker ps -a
+
+docker run --name web01 -d -p 9080:80 nginx
+
+we need -p 9080:80 (port mapping) to access it from outside.
+
+9080 -> host port. host is the VM
+80 -> container port
+
+To get the IpAddress we can do
+root@vagrant:~# docker inspect <container name/ID>
+
+We can access the container locally by using container port
+root@vagrant:~# curl http://172.17.0.2:80
+
+to get the public ip of vm
+root@vagrant:~# ip addr show
+enp0s8 is the bridge ip
+In browser http://192.168.0.105:9080/
+
+So from outside we access from the hostport/nodeport which routes 
+to the container and gets our data.
+
+
+
+DOCKER NETWORKING
+-------------------
+
+
+
+
+
+
+

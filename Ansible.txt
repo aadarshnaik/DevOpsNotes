@@ -1,0 +1,586 @@
+Ansible Use Cases
+-------------------
+Automation
+Change Management - Production server Change
+Provisioning - Setup servers from scratch/ Cloud Provisioning
+Orchestration - Large scale automation framework
+
+Ansible is simple
+No agents -  Target machines/Services are accessed by SSH, winrm & API
+No Databases - YAML, INI, texts
+No Complex setup, Its just a python library
+
+Default inventory file is path /etc/ansible/hosts.
+Inventory file is a file created using vi/touch
+ansible_ssh_private_key_file is the .pem key we dowloaded. We keep the .pem file in same path.
+
+
+Inventory file - host mapping
+
+web01 ansible_host=172.31.22.234 ansible_user=centos ansible_ssh_private_key_file=key-file.pem
+web02 ansible_host=172.25.31.124 ansible_user=centos ansible_ssh_private_key_file=key-file.pem
+db01 ansible_host=172.19.44.168 ansible_user=centos ansible_ssh_private_key_file=key-file.pem
+
+
+ubuntu@ip-172-31-21-70:~/vprofile/exercise1$ ansible -i inventory -m ping web01 -- interactive and throw error UNREACHABLE!
+Edit the ansible configuration file vim /etc/ansible/ansible.cfg
+
+host_key_checking = False
+
+ubuntu@ip-172-31-21-70:~/vprofile/exercise1$ ansible -i inventory -m ping web01
+SUCCESS
+
+In inventory file we can create groups to execute a command to multiple machines at a time
+We can also create a group of groups.
+
+Inventory file
+----------------
+web01 ansible_host=172.31.22.234 ansible_user=centos ansible_ssh_private_key_file=key-file.pem
+web02 ansible_host=172.25.31.124 ansible_user=centos ansible_ssh_private_key_file=key-file.pem
+db01 ansible_host=172.19.44.168 ansible_user=centos ansible_ssh_private_key_file=key-file.pem
+
+[websrvgrp]
+web01
+web02
+
+[dbsrvgrp]
+db01
+
+[dc_ohio:children]
+websrvgrp
+dbsrvgrp
+
+To execute a command in all the host in inventory file
+
+ubuntu@ip-172-31-21-70:~/vprofile/exercise1$ ansible -i inventory -m ping all
+					OR
+ubuntu@ip-172-31-21-70:~/vprofile/exercise1$ ansible -i inventory -m ping '*'
+
+Defining variable at the group level
+Inventory file
+----------------
+web01 ansible_host=172.31.22.234  
+web02 ansible_host=172.25.31.124 
+db01 ansible_host=172.19.44.168 
+
+[websrvgrp]
+web01
+web02
+
+[dbsrvgrp]
+db01
+
+[dc_ohio:children]
+websrvgrp
+dbsrvgrp
+
+[dc_ohio:vars]
+ansible_user=centos
+ansible_ssh_private_key_file=key-file.pem
+
+
+
+Ad Hoc Commands
+-----------------
+ubuntu@ip-172-31-21-70:~/vprofile/exercise1$ ansible -i inventory -m yum -a "name=httpd state=present" web01 --become
+--become will elevate the privilage, if sudo is needed it'll execute with sudo.
+
+ubuntu@ip-172-31-21-70:~/vprofile/exercise1$ ansible -i inventory -m service -a "name=httpd state=started enabled=yes" web01 --become
+CHANGED
+
+
+ubuntu@ip-172-31-21-70:~/vprofile/exercise1$ vim index.html
+ubuntu@ip-172-31-21-70:~/vprofile/exercise1$ ansible -i inventory -m copy -a "src=index.html dest=/var/www/html/index.html" web01 --become
+
+
+
+Ansible Playbook
+----------------------------------------------------------------------------
+Single play, single tasks
+-------------------------------------------------
+- hosts: websrvgrp
+  tasks:
+    - yum:
+	  name: httpd
+	  state: present	
+
+Multiple plays & task
+------------------------------------------------
+- hosts: websrvgrp  --------> play
+   tasks:
+   - name: Install Apache    --------> task1
+     yum:
+       name: httpd
+       state: latest
+   - name: Deploy Config    ---------> task2
+     copy:
+       src: file/httpd.conf
+       dest: /etc/httpd.conf
+- hosts: dbsrvgrp
+  tasks: 
+  - name: Install Postgresql
+    yum:
+      name: postgresql
+      state: latest
+
+
+-------------------------------------------------------------------------------------------------------------------------------
+ubuntu@ip-172-31-21-70:~/vprofile/exercise3$ vim web_db.yaml
+
+---
+- name: Setup WebServer
+  hosts: websrvgrp
+  become: yes
+  tasks:
+    - name: Install Apache httpd
+      yum:
+        name: httpd
+        state: present
+    - name: Start and Enable httpd
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+
+- name: Setup DBserver
+  hosts: dbsrvgrp
+  become: yes
+  tasks:
+    - name: Install MySQL server
+      yum:
+        name: mariadb-server
+        state: present
+    - name: Start & Enable mariadb service
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+To check syntax of playbook
+ubuntu@ip-172-31-21-70:~/vprofile/exercise3$ ansible-playbook -i inventory web_db.yaml --syntax-check
+
+
+ubuntu@ip-172-31-21-70:~/vprofile/exercise3$ ansible-doc-l  -------> to list all modules
+
+Ansible Configuration
+------------------------
+Lets suppose we change the port number of ssh on servers. we change from 22 to something else, maybe 2020. Ansible will try to access this machine
+on port 22 and it will fail, because 22 is default. Whern we want to change defaults, we change Ansible configuration.
+
+Order of Ansible Configuration
+-------------------------------
+
+1. ANSIBLE_CONFIG
+2. ansible.cfg
+3. ~/.ansible.cfg
+4. /etc/ansible/ansible.cfg
+
+Variables
+-------------
+- hosts: websrvgrp
+  vars: 
+    http_port: 80
+    sqluser: admin
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+To setup Ansible
+------------------
+wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+yum install epel-release-latest-7.noarch.rpm
+yum install git python python-level python-pip openssl ansible -y
+vi /etc/ansible/hosts
+
+	[demo]
+	172.31.32.10
+	172.31.42.235
+
+vi /etc/ansible/ansible.cfg
+	We uncomment 
+	  inventory = /etc/ansible/hosts
+	  sudo_user = root
+
+Done in all machines
+	adduser ansible
+	passwd ansible
+
+We add ansible user to sudoers file
+	ansible ALL=(ALL) NOPASSWD: ALL
+
+
+Done in all machines
+
+	vi /etc/ssh/sshd_config
+
+	Uncomment PermitRootLogin yes
+	Uncomment PasswordAuthentication yes
+	Comment PasswordAuthentication no
+	service sshd restart
+
+[ansible@ip-172-31-43-5 ~]$ ssh-keygen
+cd .ssh/
+
+[ansible@ip-172-31-43-5 .ssh]$ ssh-copy-id ansible@172.31.41.245
+enter password
+public key will be added to the node 
+
+Host Pattern
+------------
+[ansible@ip-172-31-43-5 ~]$ ansible all --list-hosts
+
+[ansible@ip-172-31-43-5 ~]$ ansible demo --list-hosts
+
+[ansible@ip-172-31-43-5 ~]$ ansible demo[0] --list-hosts
+
+[ansible@ip-172-31-43-5 ~]$ ansible demo[0:1] --list-hosts
+
+
+Ad-hoc commands (Simple Linux) -> temporary
+Modules --> Single Work
+Playbooks --> More than one module
+
+Ad-hoc Commands
+----------------
+Ad-hoc Commands are commands which can be run individually to perform Quck functions
+These ad-hoc commands are not use for Configuration Management and deployment, because these commands are of One time usage
+The ansible ad-hoc commands uses the /usr/bin/ansible Command Line tool to automate a single task
+
+[ansible@ip-172-31-39-5 ~]$ ansible demo -a "ls"
+[ansible@ip-172-31-39-5 ~]$ ansible all -a "touch naikfile" --> to update this file in all the nodes
+
+Ansible Modules
+----------------
+
+Ansible modules are categorized into various groups based on their functionality
+- System - User, Group, Hostname, Iptables, Lvg, Lvol, Make, Mount, Ping, Timezone, Systemd, Service, etc..
+- Commands - Command, Expect, Raw, Script, Shell, etc..
+- Files - Acl, Archive, Copy, File, Find, Lineinfile, Replace, Stat, Template, Unarchive etc..
+- Database - Mongodb, Mssql, Mysql, Postgresql, Proxysql, vertica etc..
+- Cloud - Amazon, Atomic, Azure, Centrylink, Cloudscale, Cloudstack, Digital Ocean, Docker, Google, Linode, Openstack
+	    Rackspace, Smartos, Softlayer, VMware etc..
+- Windows - Win_copy, Win_command, Win_domain, Win_file, Win_iis_website, Win_msg, Win_msi, Win_package, Win_ping, Win_path, Win_robocopy, Win_shell, etc...
+- etc...
+
+Ansible ships with a number of modules (called 'module library') that can be executed directly on remote hosts or through 'playbooks'
+Your library of modules can reside on any machine, and there are no Servers, daemons, or databases Required
+
+Where ansible modules are stored ?
+The default location of inventory file is /etc/ansible/hosts
+
+[ansible@ip-172-31-39-5 ~]$ ansible demo -b -m yum -a "pkg=httpd state=present"
+
+install = present
+uninstall = absent
+update = Latest
+
+[ansible@ip-172-31-39-5 ~]$ ansible demo -b -m yum -a "pkg=httpd state=latest" --> to update
+
+[ansible@ip-172-31-39-5 ~]$ ansible demo -b -m yum -a "pkg=httpd state=absent" --> to uninstall
+
+[ansible@ip-172-31-39-5 ~]$ ansible demo -b -m service -a "pkg=httpd state=started"
+
+[ansible@ip-172-31-39-5 ~]$ ansible demo -b -m  -a "pkg=httpd state=started"
+
+[ansible@ip-172-31-39-5 ~]$ ansible demo -b -m user -a "name=raj"
+
+[ansible@ip-172-31-39-5 ~]$ ansible demo -b -m copy -a "src=file4 dest=/tmp"
+
+
+In Ansible there is a module called setup that stores the present configuration, it checks in nodes if module is present or not 
+
+[ansible@ip-172-31-39-5 ~]$ ansible demo -m setup --> shows current configuration 
+[ansible@ip-172-31-39-5 ~]$ ansible demo -m setup -a "filter=*ipv4*"
+
+
+Playbook
+-----------
+Playbook in ansible are written in YAML format
+It is human readable data Serialization language, It is Commonly used for Configuration files
+Playbook is like a file where we write code. Consists of Vars, tasks, handlers, files, template and roles
+Each Playbook is Composed of one or more 'modules' in a list. Module is a collection of Configuration files.
+Playbooks are divided into many sections like
+	Target Section - Defines the host against which playbooks task has to be executed
+	Variable Section - Define Variables
+	Task Section - List of all modules that we need to run, in an order
+
+
+YAML (Yet another Markup Language)
+------------------------------------
+For ansible, nearly every YAML files starts with a list
+Each item in the list is a list of key-value pairs commonly called dictionary
+All YAML files have to begin with "---" and end with "..."
+All members of a list lines must begin with same indentation level starting with "-"
+
+Target.yaml
+------------
+
+- hosts: demo
+- user: ansible
+- become: yes
+- connection: ssh
+- gather_facts: yes
+
+[ansible@ip-172-31-39-5 ~]$ ansible-playbook target.yaml
+
+task.yml
+
+---
+
+- hosts: demo
+  user: ansible
+  become: yes
+  connection: ssh
+  tasks:
+    - name: Install HTTPD on centos 7
+      action: yum name=httpd state=installed
+
+
+Variables
+----------
+Ansible uses variables which are defined previously to ensure more flexibility in playbooks and roles
+They can be used to loop through a set of given values, access various information like the host name 
+of a system and replace certain strings in templates with specific values
+
+Put variable section above tasks so that we define it first and use it later
+
+
+- hosts: demo
+  user: ansible
+  become: yes
+  connection: ssh
+  vars:
+    pkgname: httpd
+  task:
+    - name: install httpd server on centos 7
+      action: yum name='{{pkgname}}' state=installed
+
+
+
+Handlers
+-----------
+
+A Handler is exactly the same as a task, but it will run when called by another task
+					OR
+Handlers are just like regular tasks in an ansible playbook, but are only run if the task contains a notify directive
+and also indicate that it changed something
+
+- hosts: demo
+  user: ansible
+  become: yes
+  connection: ssh
+  tasks:
+	- name: install httpd server
+	  action: yum name=httpd state=installed
+	  notify: restart httpd
+  handlers:
+	- name: restart httpd
+	  action: service name=httpd state=restarted
+
+
+
+DryRun
+-------
+Check whether the playbook is formatted correctly
+ansible-playbook handlers.yml --check
+
+
+Loops
+-------
+
+---
+
+- hosts: demo
+  user: ansible
+  become: yes
+  connection: ssh
+  tasks:
+	- name: add a list of users
+	  user: name='{{item}}' state=present
+	  with items:
+		- Prabin
+		- Aadarsh
+		- Anup
+		- Pratyush
+		- Arpan
+		- Arpita
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ANSIBLE ROLES
+-----------------
+
+mkdir roles
+cd roles
+ansible-galaxy init <role-name>
+ansible-galaxy init mysql_db
+
+roles > mysql_db > 
+  defaults
+  handlers
+  meta
+  tasks
+    main.yaml
+  tests
+  vars
+
+ 
+Asynchronous Actions
+  Run a process and check on it later
+  Run multiple processes at once and check on them later
+  Run processes and forget
+
+
+-
+  name: Deploy Web Application
+  hosts: db_and_web_server
+  tasks:
+    - command: /opt/monitor_webapp.py
+      async: 360
+      poll: 60
+    
+    - command: /opt/monitor_database.py
+      async: 360
+      poll: 60
+
+In above task, Ansible will finish the first task and then move to next.
+We can run both of them in parallel by setting poll value to 0
+
+-
+  name: Deploy Web Application
+  hosts: db_and_web_server
+  tasks:
+    - command: /opt/monitor_webapp.py
+      async: 360
+      poll: 0
+      register: webapp_result
+    
+    - command: /opt/monitor_database.py
+      async: 360
+      poll: 0
+      register: database_result
+
+    - name: Check status of tasks
+      async_status: jid={{ webapp_result.ansible_job_id }}
+      register: job_result
+      until: job_result.finished
+      retries: 30
+
+STRATEGY
+----------------
+Ansible by default works on Linear Strategy
+We can change strategy by 
+-
+  name: Deploy Web Applications
+  strategy: free
+  hosts: server1, server2, server3
+  tasks:
+
+In free strategy, The tasks are run independently on each server and doesn't wait for the tasks to finish
+
+We can control the no of servers being execute at once in default linear strategy using serial command
+-
+  name: Deploy Web Applications
+  serial: 3
+  hosts: server1, server2, server3
+  tasks:
+
+
+Ansible works on 5 different servers simultaneously using parallel processers called forks. 
+We can modify fork configuration in ansible.cfg file
+
+
+
+
+ERRORS in Ansible
+---------------------
+- 
+  name: Deploy Web Application
+  hosts: db_and_web_server
+  tasks:
+    ........
+    .........
+
+    - mail:
+        to: random@ansible.com
+        subject: Server Deployed
+        body: Anything in the body
+      ignore_errors: yes
+    
+    - command: cat /var/log/server.log
+      regsiter: command_output
+      failed_when: "'ERROR' in command_output.stdout"
+  
+
+
+JINJA2 TEMPLATING
+--------------------
+-
+  name: Test Template playbook
+  hosts: localhost
+  vars:
+    my_name: Aadarsh naik
+  tasks:
+    - debug:
+        msg: "Myname is {{ my_name }}"
+
+
+The name is {{ my_name }} => The name is Bond
+The name is {{ my_name | upper }} => The name is BOND
+The name is {{ my_name | lower }} => The name is bond
+The name is {{ my_name | title }} => The name is Bond
+The name is {{ my_name | replace("Bond","Bourne") }} => The name is Bourne
+The name is {{ first_name | default("James") }} {{ my_name }} => The name is James Bond
+
+{{ [1,2,3] | min }} => 1
+{{ [1,2,3] | max }} => 3
+{{ [1,2,3,2] | unique }} => 1,2,3
+{{ [1,2,3,4] | union( [4,5] ) }} => 1,2,3,4,5
+{{ [1,2,3,4] | intersect( [4,5] ) }} => 4
+{{ 100 | random }} => Random number
+{{ ["The","name","is","Bond"] | join(" ")}} => The name is Bond
+
+{{ "/etc/hosts" | basename }} => hosts
+{{ "c\windows\hosts" | win_basename }} => hosts
+{{ "c\windows\hosts" | win_splitdrive }} => ["c:","\windows\hosts"]
+{{ "c\windows\hosts" | win_splitdrive | first }} => "c:"
+{{ "c\windows\hosts" | win_splitdrive | last }} => "\windows\hosts"
+
+
+LOOKUP
+--------------
+If we want to get data from any other files eg. hostname and passwords from a 
+csv file for inventory

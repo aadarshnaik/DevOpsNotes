@@ -1,0 +1,18 @@
+Application areas of Python
+------------------------------
+- Web Application Development
+- API Development
+- Desktop GUI Application Development
+- Data Analysis
+- AI (Artificial Intelligence)
+- Web Scraping & Text Processing
+- Selenium Testing with Python
+- Automation
+
+Advantages
+------------
+- Python is easy
+- Predefined python modules
+- Code length is very short because of third party modules
+- Platform Independent
+- Python supports functional as well as oops concept 

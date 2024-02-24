@@ -1,0 +1,183 @@
+******************** POD ************************
+--------------------------------------------------
+
+pod-definition.yml
+------------------------------
+apiVersion: v1
+kind: Pod
+metadata:
+    name: myapp-pod
+    labels:
+        app: myapp
+        type: front-end
+spec:
+    containers:
+        - name: nginx-container
+          image: nginx
+
+> kubectl create -f pod-definition.yml
+
+
+Kubernetes Controllers - Controllers are the brain behind Kubernetes. 
+They are the processes that monitor Kubernetes objects and respond accordingly
+
+Replication Controller - It helps us run multiple instances of a single pod in the Kubernetes cluster
+thus providing High Availability. Its spans over multiple Nodes and does Load Balancing and Scaling.
+
+Replica Set is the new recommended way to setup Replication
+
+******************** REPLICATION CONTROLLER & REPLICASET ************************
+----------------------------------------------------------------------------------
+
+rc-definition.yml
+-------------------------------
+apiVersion: v1
+kind: ReplicationController
+metadata:
+    name: myapp-rc
+    labels: 
+        app: myapp
+        type: front-end
+spec:
+    template:
+        metadata:
+            name: myapp-pod
+            labels:
+                app: myapp
+                type: front-end
+        spec:
+            containers:
+             - name: nginx-containers
+               image: nginx
+    replicas: 3
+
+> kubectl create -f rc-definition.yml
+> kubectl get replicationcontroller
+
+One major difference between Replication Controller and ReplicaSet.
+ReplicaSet requires a selector definition. Selector sections helps decide the replicaset what pods fall under it.
+Selector is not a required field in case of a Replication Controller, 
+when we skip it in Replication Controller it assumes it to be same as the labels provided in the pod-definition file
+
+replicaset-definition.yml
+------------------------------------
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+    name: myapp-replicaset
+    labels:
+        app: myapp
+        type: front-end
+spec:
+    template:
+        metadata:
+            name: myapp-pod
+            labels:
+                app: myapp
+                type: front-end
+            spec:
+                containers:
+                    - name: nginx-container
+                      image: nginx
+    replicas: 3
+    selector:
+        matchLabels:
+            type: front-end
+
+> kubectl create -f replicaset-definition.yml
+
+ReplicaSet Commands
+--------------------------
+> kubectl create -f replicaset-definition.yml
+> kubectl get replicaset
+> kubectl delete replicaset myapp-replicaset 
+> kubectl replace -f replicaset-definition.yml
+> kubectl scale --replicas=6 -f replicaset-definition.yml
+
+****************** DEPLOYMENT **********************
+-----------------------------------------------------
+Each container is encapsulated in pods. Multiple such pods are deployed using Replication Controller / Replica Set 
+Deployment Object comes higher in the hierarchy
+
+deployment-definition.yml
+-------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: myapp-deployment
+    labels:
+        app: myapp
+        type: front-end
+spec:
+    template:
+        metadata:
+            name: myapp-pod
+            labels:
+                app: myapp
+                type: front-end
+        spec:
+            containers:
+                - name: nginx-containers
+                  image: nginx
+    replicas: 3
+    selector:
+        matchLabels:
+            type: front-end
+
+****************** NAMESPACES **********************
+-----------------------------------------------------
+Kubernetes creates a set of pods and services for its internal purpose such as those required by the networking solution, DNS Service etc...
+To Isolate these from the user and to prevent you from accidentally deleting or Modifying the services Kubernetes creates them at another 
+namespace created at cluster startup named kube-system.
+
+A third namespace created by Kubernetes publically is called kube-public, this is whhere resources made available to all users are created.
+
+If we wanted to use the same cluster for both dev and production environment but at the same time isolate the resources between them.
+We can create a different namespace for each of them. That way while working in dev environment we don't accidentally modify resources in production.
+
+The resources within a namespace can refer to each other simply by their names
+
+In same namespace (mysql.connect("db-service"))
+In different namespace (mysql.connect("db-service.dev.svc.cluster.local"))
+db-service - Service Name
+.dev - namespace
+.svc - Service
+.cluster.local - domain
+
+> kubectl get pods (default namespace)
+> kubectl get pods --namespace=kube-system
+
+pod-definition.yml
+----------------------------
+apiVersion: v1
+kind: Pod
+metadata:
+    name: myapp-pod
+    labels: 
+        app: myapp
+        type: front-end
+spec:
+    containers:
+        - name: nginx-container
+          image: nginx
+
+> kubectl create -f pod-definition.yml (created in default namespace)
+> kubectl create -f pod-definition.yml --namespace=dev (dev namespace)
+
+We can move the namespace definition into the pod definition file under the metadata section
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: myapp-pod
+    namespace: dev
+    labels: 
+        app: myapp
+        type: front-end
+spec:
+    containers:
+        - name: nginx-container
+          image: nginx
+
+To set namespace to to any namespace permanently
+> kubectl config set-context $(kubectl config current-context) --namespace=dev

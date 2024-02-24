@@ -1,0 +1,189 @@
+We always start a bash script by #! /bin/bash
+
+Variable Declaration
+--------------------------
+PACKAGE="httpd wget unzip"
+SVC="httpd"
+
+sudo yum install $PACKAGE -y 
+sudo systemctl start $SVC
+sudo systemctl enable $SVC	
+
+To pass any command in a shell script we can use $1, $2 ... $9
+
+#! /bin/bash
+wget $1 > /dev/null
+unzip $2 > /dev/null
+sudo cp -r $2/* /var/www/html/
+
+[root@scriptbox scripts]#
+[root@scriptbox scripts]# script.sh https://www.tooplate.com/zip-templates/2091_ziggy.zip 2091_ziggy
+------------------------------------------------------------------------------------------------------------------------------------------
+
+System Variables
+---------------------
+$0 - The name of the bash script
+$1-$9 - The first 9 arguments of the Bash script 
+$# - How many arguments were passed to the Bash script
+$@ - All arguments supplied to bash script
+$? - The exit status of the most recently run process
+$$ - The process ID of the current script
+$USER - The username of the user running script
+$HOSTNAME - The hostname of the machine the script is running
+$SECONDS - The number of seconds since the script was started
+$RANDOM - Returns a different random number each time it is referred to. Random number between 0 - 32767
+$LINENO - Returns the current line number in the Bash script
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Quote
+------------
+In double "quote" the variable will work 
+In Single 'quote' the variable will not work
+
+To use a $ symbol in any command without it refreeing to any variable we can use \
+[root@scriptbox scripts]# VIRUS="covid19"
+[root@scriptbox scripts]# echo "Due to $VIRUS virus company have lost \$9 million."
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Command Substitution
+---------------------------
+It takes output of a command and stores it into the variable. We can achieve that using `` or $()
+
+[root@scriptbox scripts]# UP=`uptime`
+[root@scriptbox scripts]# CURRENT_USERS=$(who)
+
+[root@scriptbox scripts]# FREE_RAM=`free -m | grep Mem | awk '{print $4}'`
+[root@scriptbox scripts]# echo "Free RAM is $FREE_RAM mb."
+Free RAM is 590 mb.
+
+Exporting Variable
+----------------------
+Variables are temporary.
+if we delare a variable outside and try to use it in a bash script,
+it won't be accessible. We need to do 
+[root@scriptbox scripts]# export varname
+
+but if we logout from current session the variable declared is gone 
+so insted we can declare a variable glabally.
+in home directory there is a hidden file called as .bashrc
+
+If we put our export command and variable in .bashrc file, it'll become 
+permanent for that user.
+
+[root@scriptbox]# source .bashrc
+
+Once we add any variable to .bashrc file we need to logout and login for
+the variables to be sourced.
+
+If we want to add global variable we can add variable to /etc/profile at 
+the end of the file.
+
+export SEASON='Winter'
+
+In root user .bashrc file variable dominates over global in /etc/profile
+
+~/.profile
+~/.bashrc
+/etc/profile -> for everyone
+
+User Input
+--------------
+
+#! /bin/bash
+
+echo "Enter your skills:"
+read SKILL
+
+echo "Your $SKILL skill is in High demand in the IT Industry."
+
+read -p 'Username: ' USR
+read -sp 'Password: ' pass
+
+echo
+ 
+echo "Login Successfull: Welcome USER $USR," 
+
+Conditionals
+-----------------------
+read -p "Enter a number: " NUM
+echo
+
+if [ $NUM -gt 100 ]
+then
+	echo "We have entered in IF block"
+	sleep 3
+	echo "Your number is greater than 100"
+	echo
+	date
+fi
+
+echo "Scripr execution completed successfully."
+------------------------------------------------------------------------------
+[root@scriptbox scripts]# ip addr show | grep -v LOOPBACK | grep -ic mtu
+
+grep -v LOOPBACK will ignore the line in which LOOPBACK is present
+-i is to ignorecase
+-c is to count
+-------------------------------------------------------------------------------
+[root@scriptbox scripts]# crontab -e 
+To schedule a script to run repetatively we can enter value in crontab -e
+
+crontab -- Repeatative tasks
+------------
+# MM HH DOM mm DOW
+# 30 20 * * 1-5 COMMAND
+* * * * * /root/scripts/monitor.sh &>> /var/log/monit_httpd.log
+--------------------------------------------------------------------------------
+FOR Loop
+-------------
+#! /bin/bash
+
+for VAR1 in java .net python ruby php
+do
+  echo "Looping....."
+  sleep 1
+  echo "##############################################"
+  echo "Value of VAR1 is $VAR1"
+  echo "##############################################"
+  date
+done
+---------------------------------------------------------------------------------
+WHILE loop
+---------------
+#! /bin/bash
+
+counter=0
+
+while [ $counter -lt 5 ]
+do
+  echo "Looping.."
+  echo "Value of counter is $counter."
+  counter=$(( $counter + 1 ))
+  sleep 1
+done
+
+echo "Out of the loop"
+---------------------------------------------------------------------------------
+We created 3 VM's. 2 Centos and 1 Ubuntu.
+Added a user devops and gave root access by adding to sudoers file for centos
+enabled password login to ubuntu from vagrant from /ssh/sshd_config file.
+and added user devops to sudoers file in ubuntu.
+
+---------------------------------------------------------------------------------
+To login to vm using key-based login
+Key based are considered as safer login
+
+[root@scriptbox]# ssh-keygen
+
+This will generate the keys.
+To apply the lock-key to vm we can do
+
+[root@scriptbox]# ssh-copy-id username@hostname_of_machine
+
+it'll ask password and apply the lock
+
+Remote Command Execution
+--------------------------------------------------------------------------------
+scp is used to push files to linux machines
+
+scp testfile.txt username@hostname_or_ip:/tmp/

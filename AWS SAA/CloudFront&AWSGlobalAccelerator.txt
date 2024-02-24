@@ -1,0 +1,109 @@
+AWS CloudFront
+----------------
+Content Delivery Network (CDN)
+Improves read performance, content is cached at the edge
+Improves users experience
+216 Point of Presence globally (edge locations)
+DDoS protection (because worldwide), integration with Shield, AWS Web Application Firewall
+
+CloudFront - Origins
+    S3 bucket
+        For distributing files and caching them at the edge
+        Enhanced security with CloudFront Origin Access Control (OAC)
+        OAC is replacing Origin Access Identity (OAI)
+        CloudFront can be used as an ingress (to upload files to S3)
+
+    Custom Origin (HTTP)
+        Application Load Balancer
+        EC2 instance
+        S3 website (must first enable the bucket as a static S3 website)
+        Any HTTP backend you want    
+
+CloudFront vs S3 Cross Region Replication
+    CloudFront:
+        Global Edge network
+        Files are cached for a TTL (maybe a day)
+        Great for static content that must be available everywhere
+    
+    S3 Cross Region Replication:
+        Must be setup for each region you want replication to happen
+        Files are updated in the real-time
+        Read only
+        Great for dynamic content that needs to be available at low-latency in few regions
+
+
+CloudFront and S3 Hands-On:
+    MyBucket (private). We can use cloudFront to make these files accessible without making them public
+    CloudFront > Origin Domain(select s3) > Origin access control > Create control settings > Default root object - index.html >
+    Update the policy created by Origin Access Policy in S3 Bucket 
+
+
+CloudFront Geographic Restriction
+    You can restrict who can access your distribution
+        Allowlist: Allow your users to access your your content only if they're in one of the countries on a list of approved countries
+        Blocklist: Prevent your users from accessing your content in they're in one of the countries on a list of banned countries
+    The "country" is determined using 3rd party Geo-IP database
+    Use case: Copyright Laws to control access to content
+
+CloudFront - Pricing
+    We can reduce the number of edge locations for cost reduction
+    Three price classes:
+        Price Class All: all regions - best performance
+        Price Class 200: most regions, but excludes the most expensive regions
+        Price Class 100: only the least expensive regions
+
+CloudFront - Cache Invalidations
+    In case you update the back-end origin, CloudFront doesn't know about it and will only get the refreshed content after TTL has expired
+    However we can force an entire or partial cacherefresh (thus bypassing the TTL) by performing a CloudFront Invalidation
+    You can invalidate all files (*) or a special path (/images/*)
+
+
+Global Accelerator
+----------------------
+    We have deployed an application and have global users who want to access it directly
+    They go over the public internet, which can add a lot of latency due to many hops
+    We wish to go as fast as possible through AWS network to minimize latency
+    Unicast IP
+        Unicast IP is one server holds one IP address
+    Anycast IP:
+        All servers hold the same IP address and the client is routed to the nearest one
+    Global Accelerator uses Anycast IP to connect to nearest server
+
+    Global Accelerator Leverage the AWS internal network to route to application
+    2 Anycast IP are created for your application
+    The Anycast IP sends traffic directly to Edge Locations
+    The Edge locations send the traffic to your application
+
+    AWS Global Accelerator
+        Works with Elastic IP, EC2 instances, ALB, NLB, public or private
+        Consistent Performance
+            Intelligent routing to lowest latency and faster regional failover
+            No issue with client cache (because IP doesn't change)
+            Internal AWS network
+        Health Checks
+            Global Accelerator performs a health check of your applications
+            Helps make your application global (failover less than 1 min for unhealthy)
+            Great for disaster recovery(thanks to health checks)
+        Security
+            only 2 external IP need to be whitelisted
+            DDoS protection thanks to AWS Shield
+    
+    AWS Global Accelerator vs CloudFront
+        They both use the AWS global network and its edge locations around the world
+        Both services integrate the AWS Shield for DDoS protection
+        CloudFront
+            Improves performance for both cacheble content (images and videos)
+            Dynamic Content (Such as API acceleration and dynamic site delivery)
+            Content is served at the edge
+        Global Accelerator
+            Improves performance for a wide range of applications over TCP or UDP
+            Proxying packets at the edge to applications running in one or more AWS Regions
+            Good fit for non-HTTP use cases, such as gaming (UDP), IoT(MQTT), or Voice over IP
+            Good for HTTP use cases that require static IP addresses
+            Good for HTTP use cases that required deterministic, fast regional failover
+	Hands-On:
+		We setup our EC2 instances in 2 zones
+		Global Accelerator > Enter name > Listerner(Port 80, Protocal TCP for HTTP traffic >
+		Endpoint groups (Enter the % of traffic we want in a region) > Health Checks > Add endpoint >
+		Create accelerator  
+				
