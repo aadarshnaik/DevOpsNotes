@@ -10,3 +10,129 @@ IAM: Permissions
     Users or groups can be assigned JSON doccuments called policies
     These policies define the permission of the users
     In AWS you apply the least privilege principle: don't give more permission than a user needs
+
+S3
+------------
+Amazon S3 is one of the main building blocks of AWS 
+Its advertised as "infinitely scaling" storage
+
+Many websites use Amazon S3 as a backbone
+Many AWS services use Amazon S3 as an integration as well
+
+Use Case 
+    Backup and storage
+    Disaster Recovery
+    Archive
+    Hybrid Cloud storage
+    Application Hosting
+    Media Hosting
+    Data lakes and big data analytics
+    Software delivery
+    Static websites
+
+    examples:
+        Nasdaq stores 7 years of data into S3 Glacier
+        Sysco runs analytics on its data and gain business insights
+    
+Amazon S3 - Buckets 
+    Amazon S3 allows people to store objects (files) in "buckets" (directories)
+    Buckets must have a globally unique name (across all regions all accounts)
+    Buckets are defined at the region level
+    S3 looks like a global service but buckets are created in a region
+    Naming convention
+        No uppercase, No underscore
+        3 - 63 characters long
+        Not an IP
+        Must start with lowercase letter or number
+        Must NOT start with the prefix xn--
+        Must NOT end with the suffix -s3alias
+
+Amazon S3 - Objects
+    Objects (files) have a Key
+    The key is the FULL path:
+        s3://my-bucket/my_file.txt
+        s3://my-bucket/my_folder1/another_folder/my_file.txt
+    The key is composed of prefix + object name 
+        s3://my-bucket/my_folder1/another_folder/my_file.txt
+    There is no concept of "directories" within buckets (although the UI will trick you to think otherwise)
+    Just keys with very long names that contain slashes ("/")
+    Object values are the content of the body:
+        Max Object Size is 5 TB (5000 GB)
+        If uploading more than 5GB, must use "multi-part upload"
+    Metadata (list of text key / value pairs - system or user metadata)
+    Tags (Unicode key / value pair - up to 10) - useful for security / lifecycle
+    Version ID (if versioning is enabled)
+
+    Create Bucket -> Select Region -> Create Bucket
+    Public URL for S3 objects are not accessible directly from Internet
+
+Amazon S3 Security
+    User-Based
+        IAM Policies - which API calls should be allowed for a specific user from IAM 
+    Resource-Based
+        Bucket Policies - bucket wide rules from the S3 console - allows cross account
+        Object Access Control List (ACL) - finer grain (can be disabled)
+        Bucket Access Control List (ACL) - less common (can be disabled)
+    Note: an IAM principal can access an S3 bucket if 
+        The user IAM permissions ALLOW it OR the resource policy ALLOWS it AND there's no explicit DENY
+    Encryption: encrypt objects in Amazon S3 using encryption keys
+    S3 Bucket Policies 
+        JSON based policies
+            Resources: buckets and objects
+            Effect: Allow / Deny
+            Actions: Set of API to Allow or Deny
+            Principal: The account or user to apply the policy to
+        Use S3 bucket for policy to:
+            Grant public access to the bucket
+            Force objects to be encrypted at upload
+            Grant access to another account (Cross Account)
+
+        {
+            "Version": "2012-10-17"
+            "Statement": [
+                "Sid": "PublicRead",
+                "Effect": "Allow",
+                "Principal": "*",
+                "Action": [
+                    "s3:GetObject"
+                ],
+                "Resource": [
+                    "arn:aws:s3:::examplebucket/*"
+                ]
+            ]
+        }
+
+        If we have an user on Internet who wants to access our files in S3 bucket we use the S3 Bucket Policy to give public access
+        If we have an user within account (IAM user) and user wants to access S3 then we can assign IAM permissions to the user through the policy
+        If its an EC2 instance and we want to access from EC2 instance to S3 bucket we need to use IAM roles 
+        If we want to allow cross-account access then we use Bucket policy
+
+        Bucket settings for Block Public Access.
+            These settings were created to prevent company data leaks 
+            If you know your bucket should never be public, leave these on 
+            Can be set at account level
+
+        Create Bucket Policy
+            Permissions -> Allow Public access -> Create Bucket Policy using Policy Generator
+
+        Amazon S3 - Static Website Hosting
+            S3 can host static websites and have them accessible on the Internet
+            The website URL will be (depending on region)
+                http://bucket-name.s3-website-aws-region.amazonaws.com
+                OR
+                http://bucket-name.s3-website.aws-region.amazonaws.com
+            If you get a 403 Forbidden error, make sure the bucket policy allows public reads!
+
+Hosting a Website on S3
+    Buckets -> properties -> Static website hosting -> Host a static website -> get the URL
+
+Amazon S3 Versioning
+    You can version your files in Amazon S3
+    It is enabled at the bucket level
+    Same key overwrite will change the "version": 1,2,3...
+    It is best practice to version your buckets
+        Protect against unintended deletes (ability to restore a version)
+        Easy rollback to previous version
+    Notes:
+        Any file that is not versioned prior to enabling versioning will have version "null"
+        Suspending versioning does not delete the previous versions 
