@@ -126,13 +126,74 @@ Amazon S3 Security
 Hosting a Website on S3
     Buckets -> properties -> Static website hosting -> Host a static website -> get the URL
 
-Amazon S3 Versioning
-    You can version your files in Amazon S3
-    It is enabled at the bucket level
-    Same key overwrite will change the "version": 1,2,3...
-    It is best practice to version your buckets
-        Protect against unintended deletes (ability to restore a version)
-        Easy rollback to previous version
-    Notes:
-        Any file that is not versioned prior to enabling versioning will have version "null"
-        Suspending versioning does not delete the previous versions 
+Amazon S3 - Versioning
+----------------------
+We can version files in Amazon S3
+It is enabled at the bucket level
+Same key overwrite will increment the "version": 1,2,3....
+It is best practice to version buckets
+-  protection against uninteded deletes
+-  Easy rollback to previous version
+Any file that is not versioned prior to enabling versioning will have version "null"
+Suspending versioning does not delete the previous versions.
+
+S3 Replication  
+--------------
+We create a new bucket for replication of a bucket
+For replication to happen and work we need to enable versioning on both source and target bucket.
+main Bucket > Management > Replication rule
+
+
+
+S3 Standard - general purpose storage of frequently accessed data. Fast access & object replication in multi AZ.
+    Low Latency and High throughput
+    Content Distribution
+    Big Data Analytics
+    Dynamic websites 
+    Gaming Applications
+S3 IA-Infrequent Access - Long-lived, but less frequently accessed data. Slow access, object replication in multi AZ
+    Backups
+    Disaster Recovery files
+    Long term storage
+S3 One Zone-IA - is for data that is accessed less frequently, but requires rapid access when needed. Slow access, no object replication.
+    Used to store data not frequently accessed in cost efficient way
+    Non Critical and easily reproducable data.
+S3 Glacier - Low cost Storage class for data Archiving
+	Low cost object storage meant for archiving/backup
+	price for storage + object retrieval cost
+	
+S3 Glacier Instant Retrieval - 
+    Millisecond retrieval, great for data accessed once a quarter
+    Minimum storage duration is 90 days
+
+S3 Glacier Flexible Retrieval - 
+    Expedited(1 to 5 mins), Standard(3 to 5 hours), Bulk (5 to 12 hours) - free
+    Minimum storage duration is 90 days
+
+S3 Glacier Deep Archive - Lowest cost storage,Long time storage, retrieval time of 12Hrs to 48 Hrs
+    public sectors, Financial Services, Healthcare
+    which need to store data for 7-10 years for compliance requirements should use this class
+    Minimum storage duration is 180 days
+
+S3 Intelligent Tiering - Automatically moves data to most cost effective tier.
+    If confused between S3 Standard and S3 Standard IA this can be used.
+    If data is not used for 30 days its is moved to IA.
+    Small monthly monitoring and auto-tiering fee
+    Moves objects automatically between access tiers based on usage
+    There are no retrieval charges in S3 Intelligent-Tiering
+
+    Frequent Access tier (automatic): default tier 
+    Infrequent Access tier (automatic): objects not accessed for 30 days
+    Archive Instant Access tier (automatic): objects not accessed for 90 days
+    Archive Access tier (optional): configurable from 90 days to 700+ days
+    Deep Archive Access tier (optional): 180 days to 700+ days
+
+By Default whatever we upload in S3 bucket is private.
+
+S3 > Create Unique Bucket name > Create Bucket 
+
+S3 Websites
+  S3 Websites can host website and have them accessible on the www
+  The website URL will be :
+     <bucket-name>.s3-website-<AWS-region>.amazonaws.com
+  If you get a 403 (Forbidden) error, make sure the bucket policy allows public reads.
