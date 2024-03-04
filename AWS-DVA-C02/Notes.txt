@@ -11,6 +11,25 @@ IAM: Permissions
     These policies define the permission of the users
     In AWS you apply the least privilege principle: don't give more permission than a user needs
 
+EC2
+--------------
+EC2 Instance Metadata (IMDS)
+    AWS EC2 Instance Metadata (IMDS) is powerful but one of the least known features to developers
+    It allows AWS EC2 instances to "learn about themselves" without using an IAM Role for that purpose
+    The URL is http://169.254.169.264/latest/meta-data
+    You can retrieve the IAM Role name from the metadata, but you CANNOT retrieve the IAM Policy.
+    Metadata = Info about the EC2 instance
+    Userdata = launch script of the EC2 instance 
+
+IMDSv2 vs. IMDSv1
+    IMDSv1 is accessing http://169.254.169.264/latest/meta-data directly
+
+    IMDSv2 is more secure and is done in 2 steps:
+        1. Get Session Token (limited validity) - using headers & PUT
+            $TOKEN=`curl -X PUT "http://169.254.169.264/latest/api/token"` -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
+        2. Use Session Token in IMDSv2 calls - using headers
+            curl http://169.254.169.264/latest/meta-data/profile -H "X-aws-ec2-metadata-token: $TOKEN"
+
 S3
 ------------
 Amazon S3 is one of the main building blocks of AWS 
@@ -197,3 +216,27 @@ S3 Websites
   The website URL will be :
      <bucket-name>.s3-website-<AWS-region>.amazonaws.com
   If you get a 403 (Forbidden) error, make sure the bucket policy allows public reads.
+
+We can host Static Website on S3 bucket.
+------------------------------------------
+1. Upload to S3 bucket all file structure.
+2. Go to Permissions and uncheck Block all public access.
+3. Select everything > Action > Make Public.
+4. Properties > Scroll to end > Static Website Hosting > edit > enable > specify index.html and error.html > save changes
+
+No Maintenance, just upload data and host it.
+
+We can create lifecycle rules to move data after a certain number of days to a different storage class or delete to save cost.
+We can add multiple transitions to move data to different storage class
+
+We have replication rules where we can replicate data from one S3 bucket to other S3 bucket for disaster recovery.
+
+S3 Object Lock and Vault lock
+ - S3 Object Lock
+     Adopt a WORM (Write Once Read Many) model
+     Block an object version deletion for a specified amount of time
+
+ - Glacier Vault Lock
+     Adopt a WORM (Write Once Read Many) model
+     Lock the policy for future edits (can no longer be changed)
+  Helpful for compliance and data retention
