@@ -1,3 +1,29 @@
+Virtualization
+--------------------
+Virtualization is the primary technology that supports cloud computing
+A service that results from virtualization, which is software that modifies hardware, is referred to as cloud computing. 
+Virtualization is necessary for cloud computing to exist
+
+Hypervisors
+
+Type 1 hypervisor
+    Bare metal - A computer which only has necessary hardware component and does not have any software present with them 
+
+    example of type 1:- kvm, xen, microsoft, hyper-v, xen - hvm, pv
+
+Type 2 --hosted
+    In this type of hypervisor, there will be a host hardware and os to this only you will mount the guest os and arch that you will set up will running like an application
+    example virtualbox, vmware
+
+XEN hypervisor - HVM & PV
+HVM (Hardware Virtual Machine) - No additional modifications can be done. 
+PV (Paravirtualization) - Software modification is allowed in PV
+
+Xen project is a hypervisor using microkernel design
+Was launched in October 2003 by University of Cambridge Computer Laboratory
+Leading open source virtualization platform which is powering the biggest players in cloud today
+AWS, RackSpace, OpenStack, Verizon Cloud etc use Xen
+
 2002 - Internally Launched
 2003 - Amazon Infrastructure is one of their core strength. Idea to market
 2004 - Launched publically with SQS
@@ -233,7 +259,7 @@ This will send email for any spend Incurred
 
 EC2 Basics
 ------------
-EC2 is one of the most populat of AWS offering
+EC2 is one of the most popular of AWS offering
 EC2 = Elastic Compute Cloud = Infrastructure as a Service
 It mainly consists in the capability of:
     Renting virtual Machines (EC2)
@@ -792,8 +818,10 @@ You can launch EC2 instances from:
         Launch instances from other AMIs
 
     Hands-On:
-        Create a EC2 Instnace and Customize it > Rightclick 
+        Create a EC2 Instnace and Customize it > Actions/Rightclick 
         > Image and template > Create image > Enter details > Create Image
+Actual content of the AMI / Storage space of the AMI is saved as a snapshot in S3
+Even if we delete the image from AMI section, we can go to snapshot and create another image 
 
 
 EC2 Instance Store
