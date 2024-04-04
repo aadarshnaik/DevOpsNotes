@@ -17,7 +17,18 @@ Type 2 --hosted
 
 XEN hypervisor - HVM & PV
 HVM (Hardware Virtual Machine) - No additional modifications can be done. 
+    HVM guests are fully virtualized. It means that the VMs running on top of their hypervisors are not aware that they are sharing processing time with 
+    other clients on the same hardware. The host should have the capability to emulate underlying hardware for each of its guest machines. 
+    This virtualization type provides the ability to run an operating system directly on top of a virtual machine without any modification — as if it were run 
+    on the bare-metal hardware. The advantage of this is that HVMs can use hardware extensions which provide very fast access to underlying hardware on the host system.
 PV (Paravirtualization) - Software modification is allowed in PV
+    Paravirtualization is a virtualization technique that involves modifying the guest operating system (OS) to be aware of the virtualization layer. 
+    Unlike full virtualization, where the guest OS runs without modifications, paravirtualization requires some changes to the guest OS kernel to interact 
+    efficiently with the virtualization layer, often referred to as the hypervisor.
+
+    In paravirtualization, the guest OS kernel is modified to replace certain privileged instructions with hypercalls. 
+    Hypercalls are special calls made by the guest OS to the hypervisor to perform tasks that would otherwise require privileged access.
+
 
 Xen project is a hypervisor using microkernel design
 Was launched in October 2003 by University of Cambridge Computer Laboratory
@@ -297,6 +308,8 @@ Compute Optimized -- Batch processing, Scientific Modelling, Computer intensive 
 Memory Optimized -- Analytics, In-Memory Databases -- r5.large , x1.16xlarge etc
 Acclerated Computing Instance -- Deep Learning, Machine Learning, Seismic Analysis, High floating point workloads -- p3.2xlarge , p2.xlarge etc
 Storage Optimized -- NoSQL Database, Data Warehousing, High disk performance workloads etc --   i3.large , d2.xlarge etc
+
+General Purpose categorised into M typ and T type. M type is steady traffic, T type is burstable instance. 
 
 Security Groups
 ----------------
@@ -822,6 +835,8 @@ You can launch EC2 instances from:
         > Image and template > Create image > Enter details > Create Image
 Actual content of the AMI / Storage space of the AMI is saved as a snapshot in S3
 Even if we delete the image from AMI section, we can go to snapshot and create another image 
+    From AMI Actions > Copy AMI we can copy an AMI to different region. 
+    It will take space in S3 in another region as well for AMI and data transfer charges from one region to another
 
 
 EC2 Instance Store
