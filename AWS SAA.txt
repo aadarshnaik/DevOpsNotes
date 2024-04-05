@@ -35,6 +35,11 @@ Was launched in October 2003 by University of Cambridge Computer Laboratory
 Leading open source virtualization platform which is powering the biggest players in cloud today
 AWS, RackSpace, OpenStack, Verizon Cloud etc use Xen
 
+Inside a physical server we have multiple hard drive, these hard drive are connected by RAID controller card
+RAID Controller card process is to make sure that if we have multiple hard drive we can group these hard drive together as single entity and 
+create small logical disk and give it to servers. 
+RAID - Redundent Array of Independent Disks
+
 2002 - Internally Launched
 2003 - Amazon Infrastructure is one of their core strength. Idea to market
 2004 - Launched publically with SQS
@@ -599,6 +604,13 @@ for the group:
 
 Elastic Network Interface (ENI)
 --------------------------------
+A Network Interface is the interface between a computer and an Internet network. The network IO happens through Network Interface Cards
+N/W Interface contains
+    Elastic IP
+    Public IP
+    Private IP
+    Security Groups
+
 Logical component in a VPC that represents a virtual network card
 The ENI can have the following attributes:
     Primary private IPv4, one or more secondary IPv4
@@ -810,7 +822,15 @@ Hands-On:
 
     Using Recycle Bin we can recover snapshots
 
-
+To mount the EBS Volume on Amazon Linux
+    lsblk -> available block devices
+    Create directory to be used as mount point -> mkdir -p /mnt/ebs_volume
+    Create filesystem on attached volume -> mkfs -t ext4 /dev/xvdf
+    To verify if new filesystem exists -> file -f /dev/xvdf
+    Mount EBS Volume to mountpoint -> mount /dev/xvdf /mnt/ebs_volume
+    Configure Automatic Mount to boot
+        vi /etc/fstab
+        end of file -> /dev/xvdf   /mnt/ebs_volume   ext4   defaults,nofail   0   2
 
 AMI
 ------
